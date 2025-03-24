@@ -29,16 +29,19 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { auth, googleProvider } from "../firebase/firebaseConfig";
 import { signInWithPopup } from "firebase/auth";
+import { useUserStore } from "../stores/user"
 
 export default {
   setup() {
     const router = useRouter();
     const errorMessage = ref("");
-
+    const userStore = useUserStore();
     const loginWithGoogle = async () => {
       try {
         const result = await signInWithPopup(auth, googleProvider);
-        console.log("Usuario autenticado:", result.user);
+
+        userStore.setAuthMethod("google");
+        userStore.setUserData(result.user);
         router.push("/dashboard");
       } catch (error) {
         errorMessage.value = "Error al iniciar sesión: " + error.message;
@@ -46,7 +49,8 @@ export default {
     };
 
     const accessAsGuest = () => {
-      console.log("Accediendo como invitado");
+      userStore.setAuthMethod("invitado");
+      userStore.setUserData(null);
       router.push("/dashboard");
     };
 

@@ -1,13 +1,13 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Login from "../components/Login.vue";
 import Dashboard from "../components/Dashboard.vue";
-import { auth } from "../firebase/firebaseConfig"; 
+import { auth } from "../FireBase/firebaseConfig"; 
 const routes = [
   { path: "/", component: Login },
   { 
     path: "/dashboard",
     component: Dashboard,
-   // meta: { requiresAuth: true }  // Protegemos esta ruta
+    //meta: { requiresAuth: true }  
   }
 ];
 

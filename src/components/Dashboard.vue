@@ -49,6 +49,11 @@
       </div>
     </div>
 
+    <!-- Imagen de perfil (usuario logueado o invitado) -->
+    <div class="user-avatar position-absolute top-0 m-3">
+      <img :src="userImage" alt="Avatar" class="rounded-circle shadow"
+        style="width: 50px; height: 50px; object-fit: cover; border: 3px solid black;" />
+    </div>
 
 
 
@@ -116,6 +121,7 @@
 <script>
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../FireBase/firebaseConfig";
+import { useUserStore } from "../stores/user";
 
 export default {
   data() {
@@ -156,6 +162,17 @@ export default {
     sortedPlayers() {
       return [...this.players].sort((a, b) => b.score - a.score);
     },
+    userStore() {
+      return useUserStore();
+    },
+    userImage() {
+      if (this.userStore.authMethod === "google" && this.userStore.userData?.photoURL) {
+        return this.userStore.userData.photoURL;
+      } else {
+        return "/usuario.png";
+      }
+    },
+
   },
 
   methods: {

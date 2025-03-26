@@ -27,21 +27,32 @@
 <script>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { auth, googleProvider } from "../firebase/firebaseConfig";
+import { auth, googleProvider, db } from "../FireBase/firebaseConfig";
 import { signInWithPopup } from "firebase/auth";
-import { useUserStore } from "../stores/user"
+import { setDoc, doc } from "firebase/firestore";
+import { useUserStore } from "../stores/user";
 
 export default {
   setup() {
     const router = useRouter();
     const errorMessage = ref("");
     const userStore = useUserStore();
+
     const loginWithGoogle = async () => {
       try {
         const result = await signInWithPopup(auth, googleProvider);
+        const user = result.user;
+
+        // Guarda los datos del usuario en Firestore
+        await setDoc(doc(db, "users", user.uid), {
+          displayName: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+          lastLogin: new Date(),
+        });
 
         userStore.setAuthMethod("google");
-        userStore.setUserData(result.user);
+        userStore.setUserData(user);
         router.push("/dashboard");
       } catch (error) {
         errorMessage.value = "Error al iniciar sesión: " + error.message;
@@ -60,14 +71,12 @@ export default {
 </script>
 
 <style scoped>
-/* Importa la fuente si es necesaria */
 @import url('https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@100..900&display=swap');
 
 html,
 body {
   margin: 0;
   padding: 0;
-  /* No fuerces la altura aquí, deja que Bootstrap maneje las clases min-vh-100 */
   font-family: 'Kumbh Sans', sans-serif;
 }
 
@@ -78,14 +87,11 @@ body {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 30px;
   width: 90%;
-  /* Ajusta si quieres diferente ancho */
 }
 
-/* Títulos */
 h1 {
   font-size: 40px;
   font-weight: 900;
-  /* Black */
   letter-spacing: 2px;
   margin-bottom: 15px;
 }
@@ -93,11 +99,9 @@ h1 {
 p {
   font-size: 20px;
   font-weight: 600;
-  /* SemiBold */
   letter-spacing: 1px;
 }
 
-/* Botones */
 button {
   padding: 12px;
   font-size: 18px;
@@ -113,7 +117,6 @@ button:hover {
   color: white;
 }
 
-/* Ajuste tipográfico para los botones */
 .play-btn,
 .login-btn {
   font-size: 20px;
@@ -121,7 +124,6 @@ button:hover {
   letter-spacing: 2px;
 }
 
-/* Icono de Google */
 .icon {
   width: 24px;
   height: 24px;

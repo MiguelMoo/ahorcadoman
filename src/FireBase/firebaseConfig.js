@@ -1,12 +1,9 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { getFirestore, getDoc, doc, setDoc } from "firebase/firestore";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyB_3w_y7dWrY4wcwbG_h-UV0DsoNIb0a4k",
   authDomain: "ahorcadoman.firebaseapp.com",
@@ -19,10 +16,26 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-const db = getFirestore(app);  
-
+const db = getFirestore(app);
 export const auth = getAuth(app);
-
 export const googleProvider = new GoogleAuthProvider();
-export { db };  
+
+const signInWithGoogle = async () => {
+  try {
+    const res = await signInWithPopup(auth, googleProvider);
+    const user = res.user;
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+
+    if (!userDoc.exists()) {
+      await setDoc(doc(db, "users", user.uid), {
+        name: user.displayName,
+        email: user.email,
+        photo: user.photoURL,
+      });
+    }
+  } catch (error) {
+    console.error("Error signing in with Google: ", error);
+  }
+};
+
+export { db, signInWithGoogle };
